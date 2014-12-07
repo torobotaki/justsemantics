@@ -2,6 +2,8 @@ package semantictools;
 
 import org.junit.Test;
 
+import semantictools.ClusterThings;
+
 public class ClusterThingsTest {
 //
 //	@Test
