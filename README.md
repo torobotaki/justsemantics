@@ -11,7 +11,10 @@ clusters them using weka's kmeans.
 
 ## Installation
 
-For now weka is a dependency. But in any case I am providing the source code,
+For now weka is a dependency. It is not included/packaged, but it should be
+easy to find. 
+
+Let's be honest, this is not a one-click situation. In any case I am providing the source code,
 and I trust you will know what to do. I've used weka 3.7.5 and apache-commons
 cli 1.2 when writing this. You should probably do the same.
 
