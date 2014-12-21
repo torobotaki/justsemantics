@@ -16,43 +16,33 @@ public class SemClassToWordsTable extends HashMap<String, HashSet<String>>{
 	public SemClassToWordsTable() {
 	}
 
-
+	/**
+	 * Mimics a HashMap put, by adding this semantic class(parameter) to the map. It adds an entry containing the SemanticClass(key) and all of its words (value)
+	 * @param semclass
+	 * @return the previous value associated with key, or null if there was no mapping for key. (A null return can also indicate that the map previously associated null with key.)
+	 */
 	public HashSet<String> add(SemanticClass semclass){
 		if (!semanticClasses.contains(semclass)) {
 			semanticClasses.add(semclass);
 		}
 		return super.put(semclass.name, semclass.words); 
 	}
-	
+
+	/**
+	 * Mimics a HashMap put, by adding each semantic class of the set (parameter) to the map. For each SemanticClass it adds an entry containing the SemanticClass(key) and all of its words (value)
+	 * @param semclass
+	 */
 	public void addAll(ArrayList<SemanticClass> semClassList) {
 		for (SemanticClass semClass:semClassList){
 			add(semClass);
 		}
 	}
-	public HashSet<String> put(String name, HashSet<String> words){
-		SemanticClass semclass =getSemanticClass(name);
-		if (semclass==null) { 
-		 semclass = new SemanticClass(name, words);
-			return add(semclass); 
-		}
-		else {
-			semclass.addAll(words);
-			return super.put(semclass.name, semclass.words); 
-		}
-	}
-	public HashSet<String> put(String name, String word){
-		SemanticClass semclass =getSemanticClass(name);
-		if (semclass==null) { 
-		 semclass = new SemanticClass(name, new HashSet<String>());
-		 	semclass.add(word);
-			return add(semclass); 
-		}
-		else {
-			semclass.add(word);
-			return super.put(semclass.name, semclass.words); 
-		}
-	}
 
+	/**
+	 * Get the SemanticClass object for a semantic class  name
+	 * @param name name of the class
+	 * @return the SemanticClass object
+	 */
 	public SemanticClass getSemanticClass(String name) {
 		SemanticClass semclass = null;
 		for (SemanticClass semClassInTheList: semanticClasses){
@@ -63,10 +53,20 @@ public class SemClassToWordsTable extends HashMap<String, HashSet<String>>{
 		return semclass;
 	}
 
+	/**
+	 * A simple getter for the list of semantic classes
+	 * @return the semanticClasses (ArrayList of SemanticClass objects)
+	 */
 	public ArrayList<SemanticClass> getSemanticClasses(){
 		return semanticClasses;
 	}
 
+	/**
+	 * Add a mapping between a semantic class and a word. If there exists a semantic class with this name add the word to its words, if it is a new class, create it and add this word
+	 * @param name the name of the class
+	 * @param word the word
+	 * @return the SemanticClass object 
+	 */
 	public SemanticClass add(String name, String word) {
 		if (!containsKey(name)) {
 			put(name, new HashSet<String>());

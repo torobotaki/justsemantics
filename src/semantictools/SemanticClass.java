@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Object that holds a Semantic Class. The first string is the class's name. If the class doesn't have a name, an arbitrary name will be produced.
+ * Object that holds a Semantic Class. If the class doesn't have a name, an arbitrary name will be produced. A Semantic Class can have a name, words, a (cluster) centroid and a size.
  * @author dvalsamou
  *
  */
@@ -41,9 +41,6 @@ public class SemanticClass {
 		return words;
 	}
 
-//	public String get(int i){
-//		return words.get(i);
-//	}
 	public Boolean contains(String word){
 		return words.contains(word);
 	}

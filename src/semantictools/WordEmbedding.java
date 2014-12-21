@@ -9,19 +9,29 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WordEmbedding {
+/**
+ * An abstract class which implements the idea of word embeddings, in the form of a {@link HashMap HashMap} of String (word) to ArrayList<Double> (vectors). 
+ * It contains all the common things between different format types, such as methods to calculate distances and to transform to and from words, vectors, and Weka Instances.
+ * @author dvalsamou
+ *
+ */
+public abstract class WordEmbedding {
 	HashMap<String, ArrayList<Double>>  vectors = new HashMap<String, ArrayList<Double>>();
 	Integer vocab_size =0;
 	Integer vector_size=0;
 
 
 	public WordEmbedding() {
-		// TODO Auto-generated constructor stub
 	}
 
 
 
-
+	/**
+	 * Calculates the similarity of two words by calculating the dot product of their vectors
+	 * @param word1
+	 * @param word2
+	 * @return similarity as a Double
+	 */
 	public  Double dotProduct(String word1, String word2) {
 		Double score = 0.0;
 		final ArrayList<Double> w1v = vectors.get(word1);
@@ -32,7 +42,7 @@ public class WordEmbedding {
 		}
 		return score;
 	}
-	
+
 	public  Double dotProduct(ArrayList<Double> w1v, ArrayList<Double> w2v) {
 		Double score = 0.0;
 		if (w1v == null || w2v == null) return -100.0;
@@ -47,12 +57,17 @@ public class WordEmbedding {
 		}
 		return score;
 	}
-	
+
 
 	public ArrayList<Double> getVector (String word){
 		return vectors.get(word);
 	}
-
+	/**
+	 * Calculates the distance of two words by calculating the euclidean distance between their vectors
+	 * @param word1
+	 * @param word2
+	 * @return distance as a Double
+	 */
 	public Double euclideanDistance(String word1, String word2) {
 		ArrayList<Double> w1v = vectors.get(word1);
 		ArrayList<Double> w2v = vectors.get(word2);
@@ -79,12 +94,17 @@ public class WordEmbedding {
 		}
 		return normalizedVector;
 	}
-	
+	/**
+	 * Produce a SemanticTable object by calculating the clustering using Weka's KMeans. 
+	 * @param numOfClusters the k for kMeans
+	 * @return the semantic table, ie the set of classes/clusters calculated, as a SemanticTable object
+	 * @throws Exception
+	 */
 	public SemanticTable kMeansClustering (int numOfClusters) throws Exception{
 		SemanticTable semTable = new SemanticTable();
-		
-//		Instances instances = new Instances();
-		
+
+		//		Instances instances = new Instances();
+
 		SimpleKMeans kmeans = new SimpleKMeans();
 		kmeans.setSeed(10);
 		kmeans.setPreserveInstancesOrder(true);
@@ -97,47 +117,40 @@ public class WordEmbedding {
 		for (int j=0; j< intassignments.length; j++){
 			assignments[j] = Integer.valueOf(intassignments[j]);
 		}
-//		Set<Integer> semClassesNamesInt = new TreeSet<Integer>();
-//		semClassesNamesInt.addAll(Arrays.asList(assignments));
-//		HashMap<Integer, SemanticClass> semanticClassesMap = new HashMap<>();
-//		SemClassToWordsTable semanticClassesMap = semTable.getSemClassToWordsTable();
-//		for (Integer classNo:semClassesNamesInt){
-//			String name = ""+classNo;
-//			SemanticClass semClass = new SemanticClass(name);
-//			semanticClassesMap.put(name, semClass);
-//		}
 		ArrayList<String> vocab = new ArrayList<>();  
 		vocab.addAll(vectors.keySet());
-		
+
 		int i=0;
 		for(int clusterNum : assignments) {
 			String word = vocab.get(i);
 			String name = ""+clusterNum;
 			semTable.add(name, word);
-//			semanticClassesMap.get(clusterNum).add(word);
-		    System.out.printf("Instance %d ("+word+") -> Cluster %d\n", i+1, clusterNum);
-		    i++;
+			System.out.printf("Instance %d ("+word+") -> Cluster %d\n", i+1, clusterNum);
+			i++;
 		}
 		ArrayList<String> centroids = instancesToWords(kmeans.getClusterCentroids());
-		
+
 		for (String word:centroids){
 			SemanticClass semClass = semTable.getSemanticClassByWord(word);
 			semClass.centroid = word;
 		}
 		int[] sizes = kmeans.getClusterSizes();
-		
+
 		for (int k =0; k< sizes.length; k++) {
 			SemanticClass semClass = semTable.getSemanticClassByName(""+k);
 			semClass.size = new Integer(sizes[k]);
 		}
-		
+
 
 		return semTable;
-		
-	}
-	
 
-	
+	}
+
+
+	/**
+	 * Transform the vectors into Weka Instances. 
+	 * @return the Instances set. The attribute names are colX, where X is 0 to vector_size -1 and the values are "double" numbers.
+	 */
 	public Instances produceInstances(){
 		ArrayList<Attribute> fvWekaAttributes = new ArrayList<Attribute>();
 		for (int i = 0; i < vector_size ; i++){
@@ -152,9 +165,14 @@ public class WordEmbedding {
 			}
 			instances.add(iExample);
 		}
- 		return instances;
+		return instances;
 	}
-	
+
+	/**
+	 * Transform a Weka Instance to the corresponding double vector
+	 * @param inst
+	 * @return an ArrayList<Double> representation of the vector
+	 */
 	public ArrayList<Double> instanceToVector(Instance inst){
 		ArrayList<Double> vector = new ArrayList<>();
 		for (int i = 0; i < inst.numAttributes(); i++){
@@ -162,7 +180,12 @@ public class WordEmbedding {
 		}
 		return vector;
 	}
-	
+
+	/**
+	 * Returns the closest word to a given vector
+	 * @param vector as an ArrayList<Double>
+	 * @return word as a String
+	 */
 	public String vectorToClosestWord(ArrayList<Double> vector){
 		String word = null;
 		Double min = Double.POSITIVE_INFINITY;
@@ -176,7 +199,11 @@ public class WordEmbedding {
 		}
 		return word;
 	}
-	
+	/**
+	 * Takes a set of instances (Weka's Instances) and returns the original words. This is a short cut/approximation as it actually gives the "closest" words, but it should be good enough for now.
+	 * @param insts
+	 * @return an ArrayList<String> of the words closest to these instances, ie the original words.
+	 */
 	public ArrayList<String> instancesToWords(Instances insts){
 		ArrayList<String> words = new ArrayList<>();
 		for (Instance inst:insts){
@@ -185,24 +212,6 @@ public class WordEmbedding {
 			if (word!= null) words.add(word);
 		}
 		return words;
-		
+
 	}
-//	public Boolean sameVectors(ArrayList<Double> vector1, ArrayList<Double> vector2){
-////		Collection<Double> commonList = CollectionUtils.retainAll(vector1, vector2);
-////		Boolean same = commonList.size() == vector1.size();
-//		String text1 = vectorToString(vector1);
-//		String text2 = vectorToString(vector2);
-//		
-// 		return text1.equals(text2);
-//	}
-//	
-//	private String vectorToString(ArrayList<Double> vector){
-//		String text = "";
-//		for (Double num:vector) {
-//			String numtext=num.toString();
-//			numtext.subSequence(0, 6);
-//			text+=numtext;
-//		}
-//		return text;
-//	}
 }

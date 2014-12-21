@@ -2,19 +2,36 @@ package semantictools;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
-
+/**
+ * A type of {@link semantictools.WordEmbedding WordEmbedding} object, with appropriate methods to read from word2vec output
+ * @author dvalsamou
+ *
+ */
 public class Word2vecHelper extends WordEmbedding {
-	
+	/**
+ 	 * Creates Word2vecHelper object with self-explanatory parameters. 
+	 * @param filename binary vectors
+	 * @param binary : boolean to indicate if vectors file are in binary format (only this format is supported for the time being) 
+	 * @throws Exception
+	 */
 	public Word2vecHelper(String filename, Boolean binary) throws Exception {
 		vectors = readFile(filename, binary);
 		}
 
+	/**
+	 * Produces a list of the vectors from the word2vec binary files. Lots of 'magic' as we're dealing with binary files.
+	 * @param filename binary vectors
+	 * @param binary : boolean to indicate if vectors file are in binary format (only this format is supported for the time being) 
+	 * @return  HashMap<String, ArrayList<Double>> a mapping between the words(String)  and their the vectors, where each vector is a list of double values
+	 * @throws IOException
+	 */
 	public  HashMap<String, ArrayList<Double>>  readFile (String filename, Boolean binary) throws Exception {  
 		HashMap<String, ArrayList<Double>> vectors = new HashMap<String, ArrayList<Double>>();
 		DataInputStream dataIS = new DataInputStream(new FileInputStream(new File(filename)));
@@ -29,7 +46,6 @@ public class Word2vecHelper extends WordEmbedding {
 		String[] nums = line.split(" ");
 		 vocab_size = Integer.parseInt(nums[0]) ;
 		 vector_size = Integer.parseInt(nums[1]);
-//		System.out.println(vocab_size+" "+layer1_size);
 		if (binary){
 			int binary_len = 4*vector_size;
 			byte[] binary_data = new byte[binary_len];
@@ -46,16 +62,12 @@ public class Word2vecHelper extends WordEmbedding {
 						word = word+ch;
 					}
 				}//word read
-//				System.out.print(word+" ");
 				int vectorbytes = dataIS.read(binary_data);
 				for (int i= 0; i< vectorbytes; i +=4){
 					byte[]  bytes = {binary_data[i],binary_data[i+1],binary_data[i+2],binary_data[i+3]};
 					float f = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-//					float f = ByteBuffer.wrap( bytes ).order( ByteOrder.BIG_ENDIAN ).getDouble();  
 					vector.add(new Double(f));
-//					System.out.print(String.format("%.6f", f)+" ");
 				}
-//				System.out.println("");
 				vectors.put(word, normalizeVector(vector));
 			}
 		}

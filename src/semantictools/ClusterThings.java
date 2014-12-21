@@ -97,20 +97,30 @@ public class ClusterThings {
 			}
 		}
 	}
-	
+
+	/**
+	 * Create clusters based on word2vec binary vectors, uses Weka's implementation of KMeans.
+	 * @param vectorFileName word2vec binary vectors file, example /bibdev/travail/word2vec/trunk/minipub.vectors.bin 
+	 * @param numOfClasses number of clusters (classes), k for kMeans
+	 * @throws Exception does not really take care of exceptions! 
+	 */
 	public static void word2vecScenario(String vectorFileName, Integer numOfClasses) throws Exception{
-		//"/bibdev/travail/word2vec/trunk/minipub.vectors.bin"
 		Word2vecHelper w2v = new Word2vecHelper(vectorFileName, true);
 		SemanticTable semTable = w2v.kMeansClustering(numOfClasses);
 		semTable.printSemanticClasses();
 	}
-
+	/**
+	 * Create clusters based on glove binary vectors. uses Weka's implementation of KMeans. 
+	 * @param vocabFileName Glove vocab file (txt), example /home/dvalsamou/workspace/glove/vocab.txt
+	 * @param vectorFileName Glove binary vectors file, example /home/dvalsamou/workspace/glove/vectors.bin 
+	 * @param numOfClasses integer number of clusters (classes), k for KMeans
+	 * @throws Exception does not really take care of exceptions!
+	 */
 	public static void gloveScenario(String vocabFileName, String vectorFileName, Integer numOfClasses) throws Exception{
-		///home/dvalsamou/workspace/glove/vocab.txt", "/home/dvalsamou/workspace/glove/vectors.bin"
 		GloVeHelper gh = new GloVeHelper(vocabFileName, vectorFileName, true);
 		SemanticTable semTable = gh.kMeansClustering(numOfClasses);
 		semTable.printSemanticClasses();
-		
-		
+
+
 	}
 }
